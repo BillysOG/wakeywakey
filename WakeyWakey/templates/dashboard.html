@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LockinMartin</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='lockin martin.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>Wakey Wakey</header>
+    <main>
+        <div class="card">
+            <h2>Status Chart</h2>
+            <div class="chart-container">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Activity History</h2>
+            <table>
+                <tr><th>ID</th><th>Driver</th><th>Status</th><th>Score</th><th>Timestamp</th><th>Received At</th></tr>
+                {% for row in logs %}
+                <tr>
+                    <td>{{ row['id'] }}</td>
+                    <td>{{ row['driver'] }}</td>
+                    <td>
+                        {% if row['score'] == 0 %}
+                            <span class="badge awake">Awake</span>
+                        {% elif row['score'] == 1 %}
+                            <span class="badge drowsy">Drowsy</span>
+                        {% elif row['score'] == 2 %}
+                            <span class="badge microsleep">Microsleep</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ row['score'] }}</td>
+                    <td>{{ row['timestamp'] }}</td>
+                    <td>{{ row['received_at'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <div class="summary">
+                <div>Awake events: {{ count_awake }}</div>
+                <div>Drowsy events: {{ count_drowsy }}</div>
+                <div>Microsleep events: {{ count_microsleep }}</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© {{ current_year }} Lockin Martin | Built for WakeyWakey</p>
+    </footer>
+
+    <script>
+    const ctx = document.getElementById('statusChart');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: 'Driver Status (0=Awake, 1=Drowsy, 2=Microsleep)',
+                data: {{ statuses|safe }},
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.25,
+                pointRadius: 5,
+                pointBackgroundColor: function(context) {
+                    const value = context.raw;
+                    if (value === 0) return 'green';
+                    if (value === 1) return 'orange';
+                    if (value === 2) return 'red';
+                    return 'gray';
+                }
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    min: 0,
+                    max: 2,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            if (value === 0) return 'Awake';
+                            if (value === 1) return 'Drowsy';
+                            if (value === 2) return 'Microsleep';
+                            return value;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    </script>
+</body>
+</html>
