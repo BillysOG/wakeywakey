@@ -1,11 +1,10 @@
-from flask import Flask, request, render_template, g
+from flask import Flask, request, render_template, g, jsonify
 from datetime import datetime
 import sqlite3
 import os
 
 app = Flask(__name__)
 
-# --- Set up folder for database ---
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(DATA_DIR, 'wakeywakey.db')
 
@@ -31,15 +30,13 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 driver TEXT,
                 status TEXT,
-                score INTEGER DEFAULT 0,
+                seconds_closed REAL DEFAULT 0,
                 timestamp TEXT
             )
         ''')
         db.commit()
 
 # --- ROUTES ---
-
-# Receive data from Raspberry Pi or any client
 @app.route('/api/upload', methods=['POST'])
 def upload():
     data = request.json
@@ -48,19 +45,17 @@ def upload():
 
     db = get_db()
     db.execute(
-        "INSERT INTO logs (driver, status, score, timestamp) VALUES (?, ?, ?, ?)",
+        "INSERT INTO logs (driver, status, seconds_closed, timestamp) VALUES (?, ?, ?, ?)",
         (
             data.get('driver', 'Unknown'),
             data.get('status', 'N/A'),
-            data.get('score', 0),
-            datetime.now().strftime("%d %b %Y, %I:%M:%S %p")  # includes seconds
+            data.get('seconds_closed', 0),
+            datetime.now().strftime("%d %b %Y, %I:%M:%S %p")
         )
     )
     db.commit()
     return {"message": "Data stored successfully"}, 200
 
-
-# Serve the dashboard page
 @app.route('/')
 def dashboard():
     db = get_db()
@@ -70,33 +65,31 @@ def dashboard():
     count_drowsy = db.execute("SELECT COUNT(*) FROM logs WHERE status='drowsy'").fetchone()[0]
     count_microsleep = db.execute("SELECT COUNT(*) FROM logs WHERE status='microsleep'").fetchone()[0]
 
+    # Handle missing 'seconds_closed' gracefully
+    seconds_values = [row['seconds_closed'] if 'seconds_closed' in row.keys() else 0 for row in logs][-10:]
     labels = [row['timestamp'] for row in logs][-10:]
-    scores = [row['score'] for row in logs][-10:]
 
     return render_template(
         'dashboard.html',
         logs=logs,
         labels=labels,
-        scores=scores,
+        seconds_values=seconds_values,
         count_awake=count_awake,
         count_drowsy=count_drowsy,
         count_microsleep=count_microsleep,
         current_year=datetime.now().year
     )
 
-
-# --- API route for live chart data ---
 @app.route('/api/logs')
 def get_logs():
     db = get_db()
     logs = db.execute("SELECT * FROM logs ORDER BY id DESC LIMIT 10").fetchall()
     data = {
-        "labels": [row['timestamp'] for row in logs][::-1],
-        "scores": [row['score'] for row in logs][::-1],
+        "timestamps": [row['timestamp'] for row in logs][::-1],
+        "seconds_closed": [row['seconds_closed'] if 'seconds_closed' in row.keys() else 0 for row in logs][::-1],
         "statuses": [row['status'] for row in logs][::-1]
     }
-    return data
-
+    return jsonify(data)
 
 # --- MAIN EXECUTION ---
 if __name__ == '__main__':

@@ -11,7 +11,7 @@
     <header>Wakey Wakey</header>
     <main>
         <div class="card">
-            <h2>Status Chart</h2>
+            <h2>Seconds Eyes Closed Chart</h2>
             <div class="chart-container">
                 <canvas id="statusChart"></canvas>
             </div>
@@ -24,23 +24,15 @@
                     <th>ID</th>
                     <th>Driver</th>
                     <th>Status</th>
-                    <th>Score</th>
+                    <th>Seconds Closed</th>
                     <th>Timestamp</th>
                 </tr>
                 {% for row in logs %}
                 <tr>
                     <td>{{ row['id'] }}</td>
                     <td>{{ row['driver'] }}</td>
-                    <td>
-                        {% if row['score'] == 0 %}
-                            <span class="badge awake">Awake</span>
-                        {% elif row['score'] == 1 %}
-                            <span class="badge drowsy">Drowsy</span>
-                        {% elif row['score'] == 2 %}
-                            <span class="badge microsleep">Microsleep</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ row['score'] }}</td>
+                    <td>{{ row['status'] }}</td>
+                    <td>{{ row['seconds_closed'] }}</td>
                     <td>{{ row['timestamp'] }}</td>
                 </tr>
                 {% endfor %}
@@ -64,20 +56,19 @@
         data: {
             labels: {{ labels|tojson }},
             datasets: [{
-                label: 'Driver Status (0=Awake, 1=Drowsy, 2=Microsleep)',
-                data: {{ scores|tojson }},
-                borderColor: 'rgb(255, 99, 132)',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                label: 'Seconds Eyes Closed',
+                data: {{ seconds_values|tojson }},
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderWidth: 2,
                 fill: true,
                 tension: 0.25,
                 pointRadius: 5,
                 pointBackgroundColor: function(context) {
-                    const value = context.raw;
-                    if (value === 0) return 'green';
-                    if (value === 1) return 'orange';
-                    if (value === 2) return 'red';
-                    return 'gray';
+                    const val = context.raw;
+                    if (val === 0) return 'green';
+                    if (val > 0 && val < 5) return 'orange';
+                    return 'red';
                 }
             }]
         },
@@ -85,15 +76,12 @@
             responsive: true,
             scales: {
                 y: {
-                    min: 0,
-                    max: 2,
+                    beginAtZero: true,
+                    max: 6,
                     ticks: {
                         stepSize: 1,
                         callback: function(value) {
-                            if (value === 0) return 'Awake';
-                            if (value === 1) return 'Drowsy';
-                            if (value === 2) return 'Microsleep';
-                            return value;
+                            return value >= 5 ? '5+' : value;
                         }
                     }
                 }
@@ -105,16 +93,12 @@
         try {
             const response = await fetch('/api/logs');
             const data = await response.json();
-
-            chart.data.labels = data.labels;
-            chart.data.datasets[0].data = data.scores;
+            chart.data.labels = data.timestamps;
+            chart.data.datasets[0].data = data.seconds_closed;
             chart.update();
-        } catch (error) {
-            console.error('Error updating chart:', error);
-        }
+        } catch (err) { console.error(err); }
     }
 
-    // Initial chart update + live refresh every second
     updateChart();
     setInterval(updateChart, 1000);
     </script>
