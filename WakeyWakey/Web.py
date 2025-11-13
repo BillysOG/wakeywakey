@@ -32,13 +32,14 @@ def init_db():
                 driver TEXT,
                 status TEXT,
                 score INTEGER DEFAULT 0,
-                timestamp TEXT,
-                received_at TEXT
+                timestamp TEXT
             )
         ''')
         db.commit()
 
 # --- ROUTES ---
+
+# Receive data from Raspberry Pi or any client
 @app.route('/api/upload', methods=['POST'])
 def upload():
     data = request.json
@@ -47,19 +48,19 @@ def upload():
 
     db = get_db()
     db.execute(
-        "INSERT INTO logs (driver, status, score, timestamp, received_at) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO logs (driver, status, score, timestamp) VALUES (?, ?, ?, ?)",
         (
             data.get('driver', 'Unknown'),
             data.get('status', 'N/A'),
             data.get('score', 0),
-            data.get('timestamp', datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            datetime.now().strftime("%d %b %Y, %I:%M:%S %p")  # includes seconds
         )
     )
     db.commit()
     return {"message": "Data stored successfully"}, 200
 
 
+# Serve the dashboard page
 @app.route('/')
 def dashboard():
     db = get_db()
@@ -69,15 +70,14 @@ def dashboard():
     count_drowsy = db.execute("SELECT COUNT(*) FROM logs WHERE status='drowsy'").fetchone()[0]
     count_microsleep = db.execute("SELECT COUNT(*) FROM logs WHERE status='microsleep'").fetchone()[0]
 
-    # Chart data
     labels = [row['timestamp'] for row in logs][-10:]
-    statuses = [row['score'] for row in logs][-10:]
+    scores = [row['score'] for row in logs][-10:]
 
     return render_template(
         'dashboard.html',
         logs=logs,
         labels=labels,
-        statuses=statuses,
+        scores=scores,
         count_awake=count_awake,
         count_drowsy=count_drowsy,
         count_microsleep=count_microsleep,
@@ -85,6 +85,20 @@ def dashboard():
     )
 
 
+# --- API route for live chart data ---
+@app.route('/api/logs')
+def get_logs():
+    db = get_db()
+    logs = db.execute("SELECT * FROM logs ORDER BY id DESC LIMIT 10").fetchall()
+    data = {
+        "labels": [row['timestamp'] for row in logs][::-1],
+        "scores": [row['score'] for row in logs][::-1],
+        "statuses": [row['status'] for row in logs][::-1]
+    }
+    return data
+
+
+# --- MAIN EXECUTION ---
 if __name__ == '__main__':
     init_db()
-    app.run(host='0.0.0.0',port=5000)
+    app.run(host='0.0.0.0', port=5000)

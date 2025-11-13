@@ -20,7 +20,13 @@
         <div class="card">
             <h2>Activity History</h2>
             <table>
-                <tr><th>ID</th><th>Driver</th><th>Status</th><th>Score</th><th>Timestamp</th><th>Received At</th></tr>
+                <tr>
+                    <th>ID</th>
+                    <th>Driver</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                    <th>Timestamp</th>
+                </tr>
                 {% for row in logs %}
                 <tr>
                     <td>{{ row['id'] }}</td>
@@ -36,7 +42,6 @@
                     </td>
                     <td>{{ row['score'] }}</td>
                     <td>{{ row['timestamp'] }}</td>
-                    <td>{{ row['received_at'] }}</td>
                 </tr>
                 {% endfor %}
             </table>
@@ -54,13 +59,13 @@
 
     <script>
     const ctx = document.getElementById('statusChart');
-    new Chart(ctx, {
+    let chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: {{ labels|safe }},
+            labels: {{ labels|tojson }},
             datasets: [{
                 label: 'Driver Status (0=Awake, 1=Drowsy, 2=Microsleep)',
-                data: {{ statuses|safe }},
+                data: {{ scores|tojson }},
                 borderColor: 'rgb(255, 99, 132)',
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 borderWidth: 2,
@@ -95,6 +100,23 @@
             }
         }
     });
+
+    async function updateChart() {
+        try {
+            const response = await fetch('/api/logs');
+            const data = await response.json();
+
+            chart.data.labels = data.labels;
+            chart.data.datasets[0].data = data.scores;
+            chart.update();
+        } catch (error) {
+            console.error('Error updating chart:', error);
+        }
+    }
+
+    // Initial chart update + live refresh every second
+    updateChart();
+    setInterval(updateChart, 1000);
     </script>
 </body>
 </html>
