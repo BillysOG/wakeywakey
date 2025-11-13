@@ -6,49 +6,6 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='lockin martin.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* Table layout */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-
-        /* Status boxes */
-        td.status-awake {
-            background-color: #28a745; /* green */
-            color: white;
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 6px;
-        }
-        td.status-drowsy {
-            background-color: #ffc107; /* orange */
-            color: white;
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 6px;
-        }
-        td.status-microsleep {
-            background-color: #dc3545; /* red */
-            color: white;
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 6px;
-        }
-
-        /* Optional: hover effect for row */
-        tr:hover td {
-            opacity: 0.85;
-        }
-    </style>
 </head>
 <body>
     <header>Wakey Wakey</header>
@@ -95,57 +52,61 @@
     </footer>
 
     <script>
-    const ctx = document.getElementById('statusChart');
-    let chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {{ labels|tojson }},
-            datasets: [{
-                label: 'Seconds Eyes Closed',
-                data: {{ seconds_values|tojson }},
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.25,
-                pointRadius: 5,
-                pointBackgroundColor: function(context) {
-                    const val = context.raw;
-                    if (val === 0) return 'green';
-                    if (val > 0 && val < 5) return 'orange';
-                    return 'red';
-                }
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 5,
-                    ticks: {
-                        stepSize: 1,
-                        callback: function(value) {
-                            return value === 5 ? '5+' : value;
-                        }
+    document.addEventListener('DOMContentLoaded', () => {
+        const ctx = document.getElementById('statusChart').getContext('2d');
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ labels|tojson }},
+                datasets: [{
+                    label: 'Seconds Eyes Closed',
+                    data: {{ seconds_values|tojson }},
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.25,
+                    pointRadius: 5,
+                    pointBackgroundColor: function(context) {
+                        const val = context.raw;
+                        if (val === 0) return 'green';
+                        if (val > 0 && val < 5) return 'orange';
+                        return 'red';
+                    }
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
                     }
                 }
             }
+        });
+
+        async function updateChart() {
+            try {
+                const response = await fetch('/api/logs');
+                const data = await response.json();
+                const seconds = data.seconds_closed.map(x => Number(x) || 0);
+
+                chart.data.labels = data.timestamps;
+                chart.data.datasets[0].data = seconds;
+
+                const maxVal = Math.max(...seconds, 5);
+                chart.options.scales.y.max = maxVal + 1;
+
+                chart.update();
+            } catch (err) { console.error(err); }
         }
+
+        updateChart();
+        setInterval(updateChart, 1000);
     });
-
-    async function updateChart() {
-        try {
-            const response = await fetch('/api/logs');
-            const data = await response.json();
-            chart.data.labels = data.timestamps;
-            chart.data.datasets[0].data = data.seconds_closed;
-            chart.update();
-        } catch (err) { console.error(err); }
-    }
-
-    updateChart();
-    setInterval(updateChart, 1000);
     </script>
 </body>
 </html>

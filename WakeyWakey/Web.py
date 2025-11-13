@@ -65,8 +65,7 @@ def dashboard():
     count_drowsy = db.execute("SELECT COUNT(*) FROM logs WHERE status='drowsy'").fetchone()[0]
     count_microsleep = db.execute("SELECT COUNT(*) FROM logs WHERE status='microsleep'").fetchone()[0]
 
-    # Handle missing 'seconds_closed' gracefully
-    seconds_values = [row['seconds_closed'] if 'seconds_closed' in row.keys() else 0 for row in logs][-10:]
+    seconds_values = [row['seconds_closed'] for row in logs][-10:]
     labels = [row['timestamp'] for row in logs][-10:]
 
     return render_template(
@@ -86,7 +85,7 @@ def get_logs():
     logs = db.execute("SELECT * FROM logs ORDER BY id DESC LIMIT 10").fetchall()
     data = {
         "timestamps": [row['timestamp'] for row in logs][::-1],
-        "seconds_closed": [row['seconds_closed'] if 'seconds_closed' in row.keys() else 0 for row in logs][::-1],
+        "seconds_closed": [row['seconds_closed'] for row in logs][::-1],
         "statuses": [row['status'] for row in logs][::-1]
     }
     return jsonify(data)
