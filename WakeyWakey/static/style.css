@@ -62,7 +62,7 @@ tr:hover {
     transition: background-color 0.2s;
 }
 
-
+/* Summary */
 .summary {
     display: flex;
     justify-content: space-between;
@@ -71,6 +71,7 @@ tr:hover {
     color: #444;
 }
 
+/* Badges */
 .badge {
     display: inline-block;
     padding: 3px 8px;
@@ -79,9 +80,21 @@ tr:hover {
     font-size: 0.85em;
 }
 
-.badge.awake { background-color: #28a745; }       /* green */
-.badge.drowsy { background-color: #ffc107; }     /* orange */
-.badge.microsleep { background-color: #dc3545; } /* red */
+/* Status column boxes (smaller) */
+td.status-awake,
+td.status-drowsy,
+td.status-microsleep {
+    padding: 2px 6px;      /* smaller padding */
+    font-size: 0.75em;     /* smaller text */
+    border-radius: 4px;    /* smaller corners */
+    font-weight: bold;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+td.status-awake { background-color: #28a745; color: white; }
+td.status-drowsy { background-color: #ffc107; color: white; }
+td.status-microsleep { background-color: #dc3545; color: white; }
 
 footer {
     background-color: #1d3557;
@@ -89,5 +102,5 @@ footer {
     text-align: center;
     padding: 15px;
     margin-top: 40px;
-    font-size: 0.9em;
+    font-size: 0.9em;
 }

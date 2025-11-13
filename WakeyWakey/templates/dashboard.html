@@ -6,6 +6,49 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='lockin martin.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Table layout */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+
+        /* Status boxes */
+        td.status-awake {
+            background-color: #28a745; /* green */
+            color: white;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 6px;
+        }
+        td.status-drowsy {
+            background-color: #ffc107; /* orange */
+            color: white;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 6px;
+        }
+        td.status-microsleep {
+            background-color: #dc3545; /* red */
+            color: white;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 6px;
+        }
+
+        /* Optional: hover effect for row */
+        tr:hover td {
+            opacity: 0.85;
+        }
+    </style>
 </head>
 <body>
     <header>Wakey Wakey</header>
@@ -31,7 +74,9 @@
                 <tr>
                     <td>{{ row['id'] }}</td>
                     <td>{{ row['driver'] }}</td>
-                    <td>{{ row['status'] }}</td>
+                    <td class="{% if row['status']|lower == 'awake' %}status-awake{% elif row['status']|lower == 'drowsy' %}status-drowsy{% else %}status-microsleep{% endif %}">
+                        {{ row['status'] }}
+                    </td>
                     <td>{{ row['seconds_closed'] }}</td>
                     <td>{{ row['timestamp'] }}</td>
                 </tr>
@@ -77,11 +122,11 @@
             scales: {
                 y: {
                     beginAtZero: true,
-                    max: 6,
+                    max: 5,
                     ticks: {
                         stepSize: 1,
                         callback: function(value) {
-                            return value >= 5 ? '5+' : value;
+                            return value === 5 ? '5+' : value;
                         }
                     }
                 }
