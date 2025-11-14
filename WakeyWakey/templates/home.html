@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WakeyWakey - Driver Alertness System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='lockin martin.png') }}">
+    <style>
+        .hero-section {
+            /* This sets the background image dynamically */
+            background: url("{{ url_for('static', filename='hero_bg.jpg') }}") no-repeat center center/cover, 
+                        linear-gradient(135deg, var(--primary), #3b5072);
+        }
+    </style>
+</head>
+<body>
+
+<header class="home-header">
+    <div class="logo-area">
+        <a href="/" class="logo-link">
+            <img src="{{ url_for('static', filename='lockin martin.png') }}" alt="Lockin Martin Logo" class="logo-img">
+            Lockin Martin
+        </a>
+    </div>
+
+    
+    <nav class="main-nav">
+        <a href="/" class="nav-link current">Home</a>
+        <a href="/data" class="btn primary-btn">Go to Dashboard</a>
+    </nav>
+</header>
+
+<main>
+    <section class="hero-section center">
+        <div class="hero-content">
+            <hgroup>
+                <h1>WakeyWakey: Real-Time Driver Alertness System</h1>
+                <p>Automated Alarm to Combat Microsleep during driving using computer vision, integrated with an application to track and encourage safe driving.</p>
+            </hgroup>
+            <a class="btn hero-btn" href="/data">Monitor Live Data</a>
+        </div>
+    </section>
+
+    <section class="articles-section">
+        <h2 class="section-title">About Drowsy Driving & Our Solution</h2>
+        <div class="article-content" style="max-width: 900px; margin: 0 auto; padding: 0 16px; line-height: 1.6;">
+            <p>Drowsy driving is a critical yet often underestimated threat to road safety. According to the National Highway Traffic Safety Administration (NHTSA), drowsy driving contributes to approximately 91,000 police reported crashes and 50,000 injuries each year, with at least 693 confirmed fatalities in 2022 alone. However, experts widely agree that the actual figures are significantly higher due to underreporting and difficulty in detecting driver fatigue after a crash.</p>
+
+            <p>Between 2017 and 2021, an estimated 20% of all fatal crashes involved drowsy drivers, accounting for nearly 29,834 deaths. The issue disproportionately affects young drivers (ages 16 to 20) and males, and is worsened by alcohol consumption. Research also reveals that 79% of drivers have experienced drowsiness while driving, with 32% reporting near-miss accidents, a clear indication of widespread exposure to this danger.</p>
+
+            <p>Drowsiness behind the wheel impairs attention, slows reaction times, and increases the likelihood of critical decision-making errors. These effects are comparable to those of alcohol intoxication. Alarmingly, drivers with a blood alcohol concentration (BAC) of just 0.01 to 0.07 are 50% more likely to be drowsy, and this risk increases with higher BAC levels.</p>
+
+            <p>Fatigue-related crashes result in substantial social and economic burdens, costing the United States an estimated 109 billion dollars annually, excluding property damage. The Governors Highway Safety Association (GHSA) also notes that about 12% of large truck and bus crashes involve fatigued drivers, highlighting the broader impact on commercial transportation.</p>
+
+            <p>Given the magnitude of this problem, there is an urgent need for effective, real-time interventions to detect and prevent drowsy driving. Here at Locked in Martin HQ, we proposed a solution. We created a device called the WakeyWakey that offers a solution to this deadly problem. We are also implementing a web app that further increases the device's capabilities.</p>
+        </div>
+    </section>
+</main>
+
+
+<footer>
+    <p>© {{ current_year }} Lockin Martin | Built for WakeyWakey</p>
+</footer>
+
+</body>
+</html>

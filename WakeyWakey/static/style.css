@@ -1,96 +1,453 @@
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f6f8;
-    margin: 0;
-    padding: 0;
+/* WakeyWakey — improved stylesheet */
+:root {
+  --bg: #f4f6f8;
+  --card: #ffffff;
+  --primary: #1d3557;
+  --accent: #2a9d8f;
+  --muted: #4a5056;
+  --success: #28a745;
+  --warning: #ffc107;
+  --danger: #dc3545;
+  --radius: 12px;
+  --gap: 20px;
+  --max-width: 1100px;
+  --shadow: 0 6px 20px rgba(18, 38, 63, 0.08);
+  /* New Colors for Hero/Background */
+  --hero-overlay: rgba(0, 0, 0, 0.5); /* Dark overlay for text visibility */
+  --nav-hover: #e6e6e6;
+  font-size: 16px;
 }
 
-header {
-    background-color: #1d3557;
-    color: white;
-    text-align: center;
-    padding: 20px;
-    font-size: 1.5em;
-    letter-spacing: 1px;
+* {
+  box-sizing: border-box;
+}
+
+/* Sticky footer fix */
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg);
+  color: #222;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.45;
 }
 
 main {
-    padding: 30px;
-    max-width: 1000px;
-    margin: auto;
+  flex-grow: 1; /* ensures main fills space and pushes footer down */
+  /* Remove max-width/margin from main to allow hero section to be full-width */
+  margin: 0;
+  padding: 0;
 }
 
-.card {
-    background-color: white;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 25px;
+/* --- GLOBAL LAYOUT FOR CONTENT INSIDE MAIN --- */
+/* This container wraps non-full-width sections like the articles */
+.articles-section {
+  max-width: var(--max-width);
+  margin: 48px auto;
+  padding: 0 16px;
 }
 
-h2 {
-    color: #333;
-    margin-bottom: 15px;
+/* --- HEADER STYLES (MATCHING IMAGE) --- */
+header {
+  background: linear-gradient(90deg, var(--primary), #16324b);
+  color: #fff;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around; /* Space between logo and nav */
+  gap: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+  position: relative;
 }
 
-.chart-container {
-    width: 100%;
-    height: 400px; /* ensures Chart.js canvas has height */
-    margin: 0 auto 30px auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-}
-
-th, td {
-    border-bottom: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
-}
-
-th {
-    background-color: #f1f3f5;
-    color: #333;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-tr:hover {
-    background-color: #f8f9fa;
-    transition: background-color 0.2s;
-}
-
-.summary {
+.logo-link {
     display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    font-weight: bold;
-    color: #444;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.5rem;
 }
 
+.logo-img {
+    height: 40px; /* adjust as needed */
+    width: auto;
+}
+
+.main-nav {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.home-header .nav-link {
+  color: rgba(255, 255, 255, 0.95);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 0;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+
+
+.home-header .nav-link:hover,
+.home-header .nav-link.current {
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+
+/* --- HERO SECTION STYLES --- */
+.hero-section {
+  /* Placeholder for a full-width background image */
+  height: 550px; /* Adjust as needed */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Darken the image for better text visibility (Overlay effect) */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--hero-overlay);
+  z-index: 1;
+}
+
+.hero-content {
+  color: white;
+  text-align: center;
+  z-index: 2;
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  color: white;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.hero-content p {
+  font-size: 1.25rem;
+  margin-top: 0;
+  margin-bottom: 30px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.hero-btn {
+  background: var(--accent);
+  font-size: 1.1rem;
+  padding: 12px 24px;
+}
+.hero-btn:hover {
+    background: #258a7d;
+}
+
+/* --- ARTICLES SECTION STYLES --- */
+.section-title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 1.6rem;
+  color: var(--primary);
+}
+
+.articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.article-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.article-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(18, 38, 63, 0.08);
+}
+
+.article-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.article-content {
+    padding: 16px;
+}
+
+.article-content h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.8rem;
+    color: var(--primary);
+}
+
+.article-content p {
+    font-size: 1.1rem;
+    color: var(--muted);
+}
+
+
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: var(--gap);
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(18, 38, 63, 0.08);
+}
+
+/* Headings & utility */
+h1,
+h2 {
+  margin: 0 0 12px 0;
+  font-weight: 600;
+  color: #1f2a44;
+}
+h1 {
+  font-size: 1.8rem;
+}
+h2 {
+  font-size: 1.15rem;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Chart container — ensures canvas fills area */
+.chart-container {
+  width: 100%;
+  height: 400px;
+  position: relative;
+}
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.08s ease, opacity 0.08s ease;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.96;
+}
+
+/* New: Primary button style for the dashboard link in the home header */
+.primary-btn {
+    background: var(--card); /* White background */
+    color: var(--primary);
+    padding: 8px 16px;
+    font-weight: 600;
+}
+.primary-btn:hover {
+    background: #f0f0f0; /* Light gray hover */
+    color: var(--primary);
+}
+
+
+/* Table styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 14px;
+  font-size: 0.95rem;
+}
+th,
+td {
+  padding: 12px 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+th {
+  background: #f1f3f5;
+  color: #324156;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+tr {
+  transition: background-color 0.12s ease;
+}
+tr:nth-child(even) {
+  background: rgba(15, 23, 42, 0.01);
+}
+tr:hover {
+  background: rgba(15, 23, 42, 0.04);
+}
+
+/* Status badges */
 td.status-awake,
 td.status-drowsy,
 td.status-microsleep {
-    padding: 2px 6px;
-    font-size: 0.75em;
-    border-radius: 4px;
-    font-weight: bold;
-    text-align: center;
-    text-transform: capitalize;
+  padding: 6px 8px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  min-width: 92px;
+}
+td.status-awake {
+  background: var(--success);
+  text-transform: capitalize;
+}
+td.status-drowsy {
+  background: var(--warning);
+  text-transform: capitalize;
+}
+td.status-microsleep {
+  background: var(--danger);
+  text-transform: capitalize;
 }
 
-td.status-awake { background-color: #28a745; color: white; }
-td.status-drowsy { background-color: #ffc107; color: white; }
-td.status-microsleep { background-color: #dc3545; color: white; }
+/* Summary and pagination */
+.summary {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  margin-top: 14px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.pagination {
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.pagination a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: transparent;
+}
+.pagination a:hover {
+  background: rgba(29, 53, 87, 0.06);
+}
 
+/* Footer */
 footer {
-    background-color: #1d3557;
-    color: white;
-    text-align: center;
-    padding: 15px;
-    margin-top: 40px;
-    font-size: 0.9em;
+  background: linear-gradient(90deg, var(--primary), #16324b);
+  color: #fff;
+  text-align: center;
+  padding: 14px 16px;
+  font-size: 0.9rem;
+}
+
+/* Home card tweaks (Keeping the old styles just in case for other pages) */
+.home-card {
+  text-align: center;
+  padding: 36px;
+}
+.home-card p {
+  color: var(--muted);
+  margin: 12px 0 18px;
+}
+
+/* Responsive */
+@media (max-width: 1000px) {
+    .main-nav {
+        gap: 12px;
+    }
+}
+@media (max-width: 800px) {
+  :root {
+    --max-width: 92%;
+  }
+  .chart-container {
+    height: 280px;
+  }
+  th,
+  td {
+    padding: 10px 8px;
+    font-size: 0.9rem;
+  }
+  /* Header for mobile */
+  header {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .main-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+  .hero-content p {
+    font-size: 1.1rem;
+  }
+}
+
+/* Small helpers */
+.hidden {
+  display: none;
+}
+.mono {
+  font-family: monospace, ui-monospace;
+}
+.small {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Accessibility: focus */
+a:focus,
+button:focus,
+.btn:focus {
+  outline: 3px solid rgba(42, 157, 143, 0.18);
+  outline-offset: 3px;
 }

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='lockin martin.png') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header>
+    <a href="/" class="nav-link">Home</a> | Data Dashboard
+</header>
+
+<main>
+    <div class="card">
+        <h2>Seconds Eyes Closed Chart</h2>
+        <div class="chart-container">
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Activity History</h2>
+
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Driver</th>
+                <th>Status</th>
+                <th>Seconds Closed</th>
+                <th>Timestamp</th>
+            </tr>
+
+            {% for row in logs %}
+            <tr>
+                <td>{{ row['id'] }}</td>
+                <td>{{ row['driver'] }}</td>
+
+                <td class="{% if row['status'] == 'awake' %}status-awake
+                           {% elif row['status'] == 'drowsy' %}status-drowsy
+                           {% else %}status-microsleep{% endif %}">
+                    {{ row['status'] }}
+                </td>
+
+                <td>{{ row['seconds_closed'] }}</td>
+                <td>{{ row['timestamp'] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <div class="summary">
+            <div>Awake: {{ count_awake }}</div>
+            <div>Drowsy: {{ count_drowsy }}</div>
+            <div>Microsleep: {{ count_microsleep }}</div>
+        </div>
+
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="/data?page={{ page - 1 }}">Previous</a>
+            {% endif %}
+            <span>Page {{ page }} of {{ total_pages }}</span>
+            {% if page < total_pages %}
+                <a href="/data?page={{ page + 1 }}">Next</a>
+            {% endif %}
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>© {{ current_year }} Lockin Martin | Built for WakeyWakey</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const ctx = document.getElementById('statusChart').getContext('2d');
+
+    // Use the logs passed to the template to match table exactly
+    const labels = {{ logs|map(attribute='timestamp')|list|tojson }};
+    const dataValues = {{ logs|map(attribute='seconds_closed')|list|tojson }};
+
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Seconds Eyes Closed',
+                data: dataValues,
+                borderColor: 'rgb(75,192,192)',
+                backgroundColor: 'rgba(75,192,192,0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.25,
+                pointRadius: 5,
+                pointBackgroundColor: function(ctx) {
+                    const v = ctx.raw;
+                    if (v === 0) return 'green';
+                    if (v > 0 && v < 5) return 'orange';
+                    return 'red';
+                }
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+});
+</script>
+
+</body>
+</html>

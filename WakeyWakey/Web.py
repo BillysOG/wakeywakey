@@ -8,7 +8,7 @@ app = Flask(__name__)
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(DATA_DIR, 'wakeywakey.db')
 
-# --- DATABASE HELPERS ---
+# ---------- DATABASE HELPERS ----------
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
@@ -36,7 +36,7 @@ def init_db():
         ''')
         db.commit()
 
-# --- ROUTES ---
+# ---------- API ----------
 @app.route('/api/upload', methods=['POST'])
 def upload():
     data = request.json
@@ -56,41 +56,59 @@ def upload():
     db.commit()
     return {"message": "Data stored successfully"}, 200
 
-@app.route('/')
-def dashboard():
+@app.route('/api/logs')
+def get_logs():
     db = get_db()
-    logs = db.execute("SELECT * FROM logs ORDER BY id DESC").fetchall()
+    logs = db.execute("SELECT * FROM logs ORDER BY id DESC LIMIT 10").fetchall()
+    return jsonify({
+        "timestamps": [row['timestamp'] for row in logs][::-1],
+        "seconds_closed": [row['seconds_closed'] for row in logs][::-1],
+        "statuses": [row['status'] for row in logs][::-1]
+    })
+
+# ---------- HOME PAGE ----------
+@app.route('/')
+def home():
+    return render_template('home.html', current_year=datetime.now().year)
+
+# ---------- DATA PAGE ----------
+@app.route('/data')
+def data_page():
+    page = int(request.args.get("page", 1))
+    per_page = 25
+    offset = (page - 1) * per_page
+
+    db = get_db()
+
+    logs = db.execute(
+        "SELECT * FROM logs ORDER BY id DESC LIMIT ? OFFSET ?",
+        (per_page, offset)
+    ).fetchall()
+
+    total_logs = db.execute("SELECT COUNT(*) FROM logs").fetchone()[0]
+    total_pages = (total_logs + per_page - 1) // per_page
 
     count_awake = db.execute("SELECT COUNT(*) FROM logs WHERE status='awake'").fetchone()[0]
     count_drowsy = db.execute("SELECT COUNT(*) FROM logs WHERE status='drowsy'").fetchone()[0]
     count_microsleep = db.execute("SELECT COUNT(*) FROM logs WHERE status='microsleep'").fetchone()[0]
 
-    seconds_values = [row['seconds_closed'] for row in logs][-10:]
-    labels = [row['timestamp'] for row in logs][-10:]
+    seconds_values = [row['seconds_closed'] for row in logs]
+    labels = [row['timestamp'] for row in logs]
 
     return render_template(
-        'dashboard.html',
+        'data.html',
         logs=logs,
         labels=labels,
         seconds_values=seconds_values,
         count_awake=count_awake,
         count_drowsy=count_drowsy,
         count_microsleep=count_microsleep,
-        current_year=datetime.now().year
+        current_year=datetime.now().year,
+        page=page,
+        total_pages=total_pages
     )
 
-@app.route('/api/logs')
-def get_logs():
-    db = get_db()
-    logs = db.execute("SELECT * FROM logs ORDER BY id DESC LIMIT 10").fetchall()
-    data = {
-        "timestamps": [row['timestamp'] for row in logs][::-1],
-        "seconds_closed": [row['seconds_closed'] for row in logs][::-1],
-        "statuses": [row['status'] for row in logs][::-1]
-    }
-    return jsonify(data)
-
-# --- MAIN EXECUTION ---
+# ---------- MAIN ----------
 if __name__ == '__main__':
     init_db()
     app.run(host='0.0.0.0', port=5000)
